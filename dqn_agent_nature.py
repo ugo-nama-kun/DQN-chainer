@@ -21,10 +21,10 @@ from rlglue.types import Action
 class DQN_class:
     # Hyper-Parameters
     gamma = 0.99  # Discount factor
-    initial_exploration = 5*10**4  # Initial exploratoin. original: 5x10^4
+    initial_exploration = 10**4  # Initial exploratoin. original: 5x10^4
     replay_size = 32  # Replay (batch) size
     target_model_update_freq = 10**4  # Target update frequancy. original: 10^4
-    data_size = 10**6  # Data size of history. original: 10^6
+    data_size = 10**5  # Data size of history. original: 10^6
 
     def __init__(self, enable_controller=[0, 3, 4]):
         self.num_of_actions = len(enable_controller)
