@@ -125,7 +125,7 @@ class DQN_class:
             self.optimizer.update()
 
     def Q_func(self, state):
-        h1 = F.relu(self.model.l1(state / 254.0))
+        h1 = F.relu(self.model.l1(state / 254.0))  # scale inputs in [0.0, 1.0]
         h2 = F.relu(self.model.l2(h1))
         h3 = F.relu(self.model.l3(h2))
         Q = self.model.q_value(h3)
