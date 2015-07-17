@@ -122,7 +122,6 @@ class DQN_class:
             self.optimizer.zero_grads()
             loss, _ = self.forward(s_replay, a_replay, r_replay, s_dash_replay, episode_end_replay)
             loss.backward()
-            self.optimizer.clip_grads(10.)
             self.optimizer.update()
 
     def Q_func(self, state):
