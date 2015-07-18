@@ -11,7 +11,6 @@ http://arxiv.org/pdf/1312.5602.pdf
 http://www.nature.com/nature/journal/v518/n7540/abs/nature14236.html
 
 For japanese instruction of DQN and historical review, please check:
-http:
 
 http://qiita.com/Ugo-Nama/items/08c6a5f6a571335972d5
 
