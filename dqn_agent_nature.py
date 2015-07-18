@@ -66,8 +66,8 @@ class DQN_class:
         Q = self.Q_func(s)  # Get Q-value
 
         # Generate Target Signals
-        tmp = self.Q_func_target(s_dash)
-        tmp = list(map(np.max, tmp.data.get()))
+        tmp = self.Q_func_target(s_dash)  # Q(s',*)
+        tmp = list(map(np.max, tmp.data.get()))  # max_a Q(s',a)
         max_Q_dash = np.asanyarray(tmp, dtype=np.float32)
         target = np.asanyarray(Q.data.get(), dtype=np.float32)
 
@@ -82,7 +82,7 @@ class DQN_class:
 
         # TD-error clipping
         td = Variable(cuda.to_gpu(target)) - Q  # TD error
-        td_tmp = td + 1000.0 * (abs(td.data) <= 1)  # Avoid zero division
+        td_tmp = td.data + 1000.0 * (abs(td.data) <= 1)  # Avoid zero division
         td_clip = td * (abs(td.data) <= 1) + td/abs(td_tmp) * (abs(td.data) > 1)
 
         zero_val = Variable(cuda.to_gpu(np.zeros((self.replay_size, self.num_of_actions))))
