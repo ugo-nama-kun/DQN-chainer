@@ -50,7 +50,8 @@ To make DQN play "Breakout", we may set as
 ( after modification) self.DQN = DQN_class(enable_controller=[0, 1, 3, 4])
 
 "enable_controller" is the list of available actions of the agents. 
-The minimum set of the actions required for each game rom are described in ale_0_4/src/games/supported/name_of_game.cpp, and you can check the corrensponding integer numberas in the section 8.1 of the technical manual of ALE:
+The minimum set of the actions required for each game rom are described in ale_0_4/src/games/supported/name_of_game.cpp,
+and you can check the corrensponding integer numberas in the section 8.1 of the technical manual of ALE:
 
 Technical Manual (you have same manual in your ale directory!): https://github.com/mgbellemare/Arcade-Learning-Environment/tree/master/doc/manual
 
@@ -58,7 +59,9 @@ Technical Manual (you have same manual in your ale directory!): https://github.c
 Modification of the hyper-parameters
 ------------------------------------
 
-If your machine does not have enough memory to run the full-version DQN, try setting the data_size variable much smaller value like 2*10**4. This setting may reduce the final performance, but still works well at least in "Pong" domain.
+If your machine does not have enough memory to run the full-version DQN, 
+try setting "data_size" variable much smaller value like 2*10**4.
+This setting may reduce the final performance, but still works well at least in "Pong" domain.
 
 ------------------------------------
 Copyright (c) 2015 Naoto Yoshida All Right Reserved.
