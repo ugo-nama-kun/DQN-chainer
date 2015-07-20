@@ -51,7 +51,7 @@ To make DQN play "Breakout", we may set as
 
 "enable_controller" is the list of available actions of the agents. 
 The minimum set of the actions required for each game rom are described in ale_0_4/src/games/supported/name_of_game.cpp,
-and you can check the corrensponding integer numberas in the section 8.1 of the technical manual of ALE:
+and you can check the corrensponding integer numbers in the section 8.1 of the technical manual of ALE:
 
 Technical Manual (you have same manual in your ale directory!): https://github.com/mgbellemare/Arcade-Learning-Environment/tree/master/doc/manual
 
