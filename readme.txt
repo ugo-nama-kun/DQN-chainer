@@ -34,7 +34,7 @@ rl_glue
 python dqn_agent_nature.py
 (third window: RLGlueExperiment
 python experiment_ale.py
-(forth window: ALE)
+(fourth window: ALE)
 ./ale -game_controller rlglue -use_starting_actions true -random_seed time -display_screen true -frame_skip 4 path_to_roms/pong.bin 
 
 In the above example, we are assuming that the binary file of the roms ("Pong" in this case) are in path_to_roms directory. 
