@@ -21,7 +21,7 @@ from rlglue.types import Action
 class DQN_class:
     # Hyper-Parameters
     gamma = 0.99  # Discount factor
-    initial_exploration = 10**4  # Initial exploratoin. original: 5x10^4
+    initial_exploration = 100#10**4  # Initial exploratoin. original: 5x10^4
     replay_size = 32  # Replay (batch) size
     target_model_update_freq = 10**4  # Target update frequancy. original: 10^4
     data_size = 10**5  # Data size of history. original: 10^6
@@ -85,7 +85,7 @@ class DQN_class:
         td_tmp = td.data + 1000.0 * (abs(td.data) <= 1)  # Avoid zero division
         td_clip = td * (abs(td.data) <= 1) + td/abs(td_tmp) * (abs(td.data) > 1)
 
-        zero_val = Variable(cuda.to_gpu(np.zeros((self.replay_size, self.num_of_actions))))
+        zero_val = Variable(cuda.to_gpu(np.zeros((self.replay_size, self.num_of_actions), dtype=np.float32)))
         loss = F.mean_squared_error(td_clip, zero_val)
         return loss, Q
 
@@ -106,6 +106,7 @@ class DQN_class:
         self.D[4][data_index] = episode_end_flag
 
     def experienceReplay(self, time):
+
         if self.initial_exploration < time:
             # Pick up replay_size number of samples from the Data
             if time < self.data_size:  # during the first sweep of the History Data
@@ -135,7 +136,7 @@ class DQN_class:
             self.optimizer.update()
 
     def Q_func(self, state):
-        h1 = F.relu(self.model.l1(state / 254.0))  # scale inputs into [0.0 1.0]
+        h1 = F.relu(self.model.l1(state / 254.0))  # scale inputs in [0.0 1.0]
         h2 = F.relu(self.model.l2(h1))
         h3 = F.relu(self.model.l3(h2))
         h4 = F.relu(self.model.l4(h3))
@@ -143,7 +144,7 @@ class DQN_class:
         return Q
 
     def Q_func_target(self, state):
-        h1 = F.relu(self.model_target.l1(state / 254.0))  # scale inputs into [0.0 1.0]
+        h1 = F.relu(self.model_target.l1(state / 254.0))  # scale inputs in [0.0 1.0]
         h2 = F.relu(self.model_target.l2(h1))
         h3 = F.relu(self.model_target.l3(h2))
         h4 = F.relu(self.model.l4(h3))
