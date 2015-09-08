@@ -37,12 +37,14 @@ python experiment_ale.py
 (fourth window: ALE)
 ./ale -game_controller rlglue -use_starting_actions true -random_seed time -display_screen true -frame_skip 4 path_to_roms/pong.bin 
 
-In the above example, we are assuming that the binary file of the roms ("Pong" in this case) are in path_to_roms directory. 
+In the above example, we are assuming that the binary file of the roms ("Pong" in this case)
+are in path_to_roms directory. 
 
 ------------------------------------
     Playing other games
 ------------------------------------
-The default setting of the code is for playing "Pong". To run with other games, you need to modify a line in "agent_start" function in "dqn_agent" class.
+The default setting of the code is for playing "Pong". 
+To run with other games, you need to modify a line in "agent_start" function in "dqn_agent" class.
 
 To make DQN play "Breakout", we may set as
 
@@ -50,7 +52,9 @@ To make DQN play "Breakout", we may set as
 ( after modification) self.DQN = DQN_class(enable_controller=[0, 1, 3, 4])
 
 "enable_controller" is the list of available actions of the agents. 
-The minimum set of the actions required for each game rom are described in ale_0_4/src/games/supported/name_of_game.cpp,
+The minimum set of the actions required for each game rom are described
+in ale_0_4/src/games/supported/name_of_game.cpp,
+
 and you can check the corrensponding integer numbers in the section 8.1 of the technical manual of ALE:
 
 Technical Manual (you have same manual in your ale directory!): https://github.com/mgbellemare/Arcade-Learning-Environment/tree/master/doc/manual
