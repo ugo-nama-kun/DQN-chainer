@@ -31,8 +31,9 @@ class DQN_class:
         self.enable_controller = enable_controller  # Default setting : "Pong"
 
         print "Initializing DQN..."
-        print "CUDA init"
-        cuda.init()
+#	Initialization for Chainer 1.1.0 or older.
+#        print "CUDA init"
+#        cuda.init()
 
         print "Model Building"
         self.model = FunctionSet(
