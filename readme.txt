@@ -32,7 +32,7 @@ The actual process will be:
 rl_glue
 (second window: RLGlueAgent)
 python dqn_agent_nature.py
-(third window: RLGlueExperiment
+(third window: RLGlueExperiment)
 python experiment_ale.py
 (fourth window: ALE)
 ./ale -game_controller rlglue -use_starting_actions true -random_seed time -display_screen true -frame_skip 4 path_to_roms/pong.bin 
