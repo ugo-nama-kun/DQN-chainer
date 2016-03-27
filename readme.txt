@@ -60,7 +60,7 @@ and you can check the corrensponding integer numbers in the section 8.1 of the t
 Technical Manual (you have same manual in your ale directory!): https://github.com/mgbellemare/Arcade-Learning-Environment/tree/master/doc/manual
 
 ------------------------------------
-Modification of the hyper-parameters
+Modification of hyper-parameters
 ------------------------------------
 
 If your machine does not have enough memory to run the full-version DQN, 
