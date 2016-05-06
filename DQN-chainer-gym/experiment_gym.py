@@ -40,10 +40,13 @@ for i_episode in xrange(num_episode):
 
     total_score[i_episode] = total_score_
     print("REWARD@" + str(i_episode) + "-th episode : " + str(total_score_))
-    if np.mod(i_episode, 10) == 0:
+    if np.mod(i_episode, 50) == 0:
         plt.figure(0)
         plt.clf()
         plt.plot(total_reward)
         plt.legend(["Total Reward"])
         plt.draw()
         plt.pause(0.001)
+
+        # Save the current agent parameters
+        agent.save()

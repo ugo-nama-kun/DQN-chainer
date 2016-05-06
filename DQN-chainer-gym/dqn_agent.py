@@ -280,7 +280,7 @@ class DQN_Agent:  # RL-glue Process
     def rgb2gray(self, image):
         return np.dot(image[...,:3], [0.299, 0.587, 0.114])
 
-    def agent_save(self):
+    def save(self):
         serializers.save_npz('network/model.model', self.dqn.model)
         serializers.save_npz('network/model_target.model',
                              self.dqn.model_target)
