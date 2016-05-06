@@ -9,7 +9,10 @@ import dqn_agent as ag
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Generate an environment
 env = gym.make('Pong-v0')
+
+# Generate an agent
 agent = ag.DQN_Agent(env)
 
 num_episode = 1000
@@ -24,19 +27,19 @@ for i_episode in xrange(num_episode):
     while True:
         env.render()
         if step_in_episode == 0:
-            observation, reward, terminal, info = env.step(agent.start(observation)) # take a random action
+            observation, reward, terminal, info = env.step(agent.start(observation)) # take an action
         else:
-            observation, reward, terminal, info = env.step(agent.act(observation, reward)) # take a random action
+            observation, reward, terminal, info = env.step(agent.act(observation, reward)) # take an action
 
         total_score_ += reward
         step_in_episode += 1
-        
+
         if terminal is True:
             agent.end(reward)
             break
 
     total_score[i_episode] = total_score_
-    print("REWARD@" + str(i_episode) + "th episode : " + str(total_score_))
+    print("REWARD@" + str(i_episode) + "-th episode : " + str(total_score_))
     if np.mod(i_episode, 10) == 0:
         plt.figure(0)
         plt.clf()
