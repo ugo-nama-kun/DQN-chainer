@@ -137,7 +137,7 @@ class DQN_class:
             self.optimizer.update()
 
     def Q_func(self, state):
-        h1 = F.relu(self.model.l1(state / 254.0))  # scale inputs in [0.0 1.0]
+        h1 = F.relu(self.model.l1(state / 255.0))  # scale inputs in [0.0 1.0]
         h2 = F.relu(self.model.l2(h1))
         h3 = F.relu(self.model.l3(h2))
         h4 = F.relu(self.model.l4(h3))
@@ -145,10 +145,10 @@ class DQN_class:
         return Q
 
     def Q_func_target(self, state):
-        h1 = F.relu(self.model_target.l1(state / 254.0))  # scale inputs in [0.0 1.0]
+        h1 = F.relu(self.model_target.l1(state / 255.0))  # scale inputs in [0.0 1.0]
         h2 = F.relu(self.model_target.l2(h1))
         h3 = F.relu(self.model_target.l3(h2))
-        h4 = F.relu(self.model.l4(h3))
+        h4 = F.relu(self.model_target.l4(h3))
         Q = self.model_target.q_value(h4)
         return Q
 
