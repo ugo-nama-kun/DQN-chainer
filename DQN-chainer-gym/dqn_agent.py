@@ -38,10 +38,10 @@ class ActionValue(Chain):
 class DQN:
     # Hyper-Parameters
     gamma = 0.99  # Discount factor
-    initial_exploration = 100#10**4  # Initial exploratoin. original: 5x10^4
+    initial_exploration = 1000#10**4  # Initial exploratoin. original: 5x10^4
     replay_size = 32  # Replay (batch) size
     target_model_update_freq = 10**4  # Target update frequancy. original: 10^4
-    data_size = 10**5  # Data size of history. original: 10^6
+    data_size = 10**6  # Data size of history. original: 10^6
     img_size = 84  # 84x84 image input (fixed)
 
     def __init__(self, n_history, n_act):
@@ -51,11 +51,11 @@ class DQN:
         self.n_history = n_history  # Number of obervations used to construct the single state
 
         print "Model Building"
-        self.model = ActionValue(n_history, n_act)
+        self.model = ActionValue(n_history, n_act).to_gpu()
         self.model_target = copy.deepcopy(self.model)
 
         print "Initizlizing Optimizer"
-        self.optimizer = optimizers.RMSpropGraves(lr=0.00025, alpha=0.95, momentum=0.95, eps=0.0001)
+        self.optimizer = optimizers.RMSpropGraves(lr=0.00025, alpha=0.95, momentum=0.95, eps=0.01)
         self.optimizer.setup(self.model)
 
         # History Data :  D=[s, a, r, s_dash, end_episode_flag]
@@ -63,13 +63,13 @@ class DQN:
         ims = self.img_size
         self.replay_buffer = [np.zeros((self.data_size, hs, ims, ims), dtype=np.uint8),
                   np.zeros(self.data_size, dtype=np.uint8),
-                  np.zeros((self.data_size, 1), dtype=np.int8),
+                  np.zeros((self.data_size, 1), dtype=np.float32),
                   np.zeros((self.data_size, hs, ims, ims), dtype=np.uint8),
                   np.zeros((self.data_size, 1), dtype=np.bool)]
 
     def get_loss(self, state, action, reward, state_prime, episode_end):
-        s = Variable(state)
-        s_dash = Variable(state_prime)
+        s = Variable(cuda.to_gpu(state))
+        s_dash = Variable(cuda.to_gpu(state_prime))
 
         q = self.model.q_function(s)  # Get Q-value
 
@@ -77,7 +77,7 @@ class DQN:
         tmp = self.model_target.q_function(s_dash)  # Q(s',*)
         tmp = list(map(np.max, tmp.data))  # max_a Q(s',a)
         max_q_prime = np.asanyarray(tmp, dtype=np.float32)
-        target = np.asanyarray(q.data, dtype=np.float32)
+        target = np.asanyarray(q.data.get(), dtype=np.float32)
 
         for i in xrange(self.replay_size):
             if not episode_end[i][0]:
@@ -89,11 +89,11 @@ class DQN:
             target[i, action[i]] = tmp_
 
         # TD-error clipping
-        td = Variable(target) - q  # TD error
+        td = Variable(cuda.to_gpu(target)) - q  # TD error
         td_tmp = td.data + 1000.0 * (abs(td.data) <= 1)  # Avoid zero division
         td_clip = td * (abs(td.data) <= 1) + td/abs(td_tmp) * (abs(td.data) > 1)
 
-        zero_val = Variable(np.zeros((self.replay_size, self.n_act), dtype=np.float32))
+        zero_val = Variable(cuda.to_gpu(np.zeros((self.replay_size, self.n_act), dtype=np.float32)))
         loss = F.mean_squared_error(td_clip, zero_val)
         return loss, q
 
@@ -127,7 +127,7 @@ class DQN:
             rs = self.replay_size
 
             s_replay = np.ndarray(shape=(rs, hs, ims, ims), dtype=np.float32)
-            a_replay = np.ndarray(shape=(rs, 1), dtype=np.uint8)
+            a_replay = np.ndarray(shape=(rs, 1), dtype=np.int8)
             r_replay = np.ndarray(shape=(rs, 1), dtype=np.float32)
             s_dash_replay = np.ndarray(shape=(rs, hs, ims, ims), dtype=np.float32)
             episode_end_replay = np.ndarray(shape=(rs, 1), dtype=np.bool)
@@ -146,16 +146,18 @@ class DQN:
 
 
     def action_sample_e_greedy(self, state, epsilon):
-        s = Variable(state)
+        s = Variable(cuda.to_gpu(state))
         q = self.model.q_function(s)
-        q = q.data[0]
+        q = q.data.get()[0]
 
         if np.random.rand() < epsilon:
             action = np.random.randint(0, self.n_act)
-            print("RANDOM")
+            print("RANDOM : " + str(action))
         else:
-            action = np.argmax(q)
-            print("GREEDY")
+            a = np.argmax(q)
+            print("GREEDY  : " + str(a))
+            action = np.asarray(a, dtype=np.int8)
+            print(q)
         return action, q
 
     def target_model_update(self, soft_update):
@@ -215,7 +217,7 @@ class DQN_Agent:  # RL-glue Process
         # Exploration decays along the time sequence
         if self.policyFrozen is False:  # Learning ON/OFF
             if self.dqn.initial_exploration < self.dqn.step:
-                self.epsilon -= 1.0/10**6
+                self.epsilon -= 1.0/10**5#1.0/10**6
                 if self.epsilon < 0.1:
                     self.epsilon = 0.1
                 eps = self.epsilon
