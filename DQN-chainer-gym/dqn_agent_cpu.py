@@ -38,7 +38,7 @@ class ActionValue(Chain):
 class DQN:
     # Hyper-Parameters
     gamma = 0.99  # Discount factor
-    initial_exploration = 10**4  # Initial exploratoin. original: 5x10^4
+    initial_exploration = 1000#10**4  # Initial exploratoin. original: 5x10^4
     replay_size = 32  # Replay (batch) size
     target_model_update_freq = 10**4  # Target update frequancy. original: 10^4
     data_size = 10**6  # Data size of history. original: 10^6
@@ -51,7 +51,7 @@ class DQN:
         self.n_history = n_history  # Number of obervations used to construct the single state
 
         print "Model Building"
-        self.model = ActionValue(n_history, n_act).to_gpu()
+        self.model = ActionValue(n_history, n_act)
         self.model_target = copy.deepcopy(self.model)
 
         print "Initizlizing Optimizer"
@@ -68,8 +68,8 @@ class DQN:
                   np.zeros((self.data_size, 1), dtype=np.bool)]
 
     def get_loss(self, state, action, reward, state_prime, episode_end):
-        s = Variable(cuda.to_gpu(state))
-        s_dash = Variable(cuda.to_gpu(state_prime))
+        s = Variable(state)
+        s_dash = Variable(state_prime)
 
         q = self.model.q_function(s)  # Get Q-value
 
@@ -77,7 +77,7 @@ class DQN:
         tmp = self.model_target.q_function(s_dash)  # Q(s',*)
         tmp = list(map(np.max, tmp.data))  # max_a Q(s',a)
         max_q_prime = np.asanyarray(tmp, dtype=np.float32)
-        target = np.asanyarray(q.data.get(), dtype=np.float32)
+        target = np.asanyarray(q.data, dtype=np.float32)
 
         for i in xrange(self.replay_size):
             if not episode_end[i][0]:
@@ -89,11 +89,11 @@ class DQN:
             target[i, action[i]] = tmp_
 
         # TD-error clipping
-        td = Variable(cuda.to_gpu(target)) - q  # TD error
+        td = Variable(target) - q  # TD error
         td_tmp = td.data + 1000.0 * (abs(td.data) <= 1)  # Avoid zero division
         td_clip = td * (abs(td.data) <= 1) + td/abs(td_tmp) * (abs(td.data) > 1)
 
-        zero_val = Variable(cuda.to_gpu(np.zeros((self.replay_size, self.n_act), dtype=np.float32)))
+        zero_val = Variable(np.zeros((self.replay_size, self.n_act), dtype=np.float32))
         loss = F.mean_squared_error(td_clip, zero_val)
         return loss, q
 
@@ -146,9 +146,9 @@ class DQN:
 
 
     def action_sample_e_greedy(self, state, epsilon):
-        s = Variable(cuda.to_gpu(state))
+        s = Variable(state)
         q = self.model.q_function(s)
-        q = q.data.get()[0]
+        q = q.data[0]
 
         if np.random.rand() < epsilon:
             action = np.random.randint(0, self.n_act)
