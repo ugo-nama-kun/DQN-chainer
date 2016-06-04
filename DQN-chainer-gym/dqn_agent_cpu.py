@@ -18,13 +18,12 @@ import chainer.links as L
 class ActionValue(Chain):
     def __init__(self, n_history, n_act):
         super(ActionValue, self).__init__(
-            l1=F.Convolution2D(n_history, 32, ksize=8, stride=4, nobias=False, wscale=np.sqrt(2)),
-            l2=F.Convolution2D(32, 64, ksize=4, stride=2, nobias=False, wscale=np.sqrt(2)),
-            l3=F.Convolution2D(64, 64, ksize=3, stride=1, nobias=False, wscale=np.sqrt(2)),
-            l4=F.Linear(3136, 512, wscale=np.sqrt(2)),
+            l1=F.Convolution2D(n_history, 32, ksize=8, stride=4, nobias=False),#, wscale=np.sqrt(2)),
+            l2=F.Convolution2D(32, 64, ksize=4, stride=2, nobias=False),#, wscale=np.sqrt(2)),
+            l3=F.Convolution2D(64, 64, ksize=3, stride=1, nobias=False),#, wscale=np.sqrt(2)),
+            l4=F.Linear(3136, 512),#, wscale=np.sqrt(2)),
             q_value=F.Linear(512, n_act,
-                             initialW=np.zeros((n_act, 512),
-                             dtype=np.float32))
+                             initialW=0.0001*np.random.randn(n_act, 512).astype(np.float32))
         )
 
     def q_function(self, state):
@@ -38,23 +37,23 @@ class ActionValue(Chain):
 class DQN:
     # Hyper-Parameters
     gamma = 0.99  # Discount factor
-    initial_exploration = 1000#10**4  # Initial exploratoin. original: 5x10^4
+    initial_exploration = 10**4  # Initial exploratoin. original: 5x10^4
     replay_size = 32  # Replay (batch) size
     target_model_update_freq = 10**4  # Target update frequancy. original: 10^4
-    data_size = 10**6  # Data size of history. original: 10^6
+    data_size = 10**5  # Data size of history. original: 10^6
     img_size = 84  # 84x84 image input (fixed)
 
     def __init__(self, n_history, n_act):
-        print "Initializing DQN..."
+        print("Initializing DQN...")
         self.step = 0  # number of steps that DQN is updated
         self.n_act = n_act
         self.n_history = n_history  # Number of obervations used to construct the single state
 
-        print "Model Building"
+        print("Model Building")
         self.model = ActionValue(n_history, n_act)
         self.model_target = copy.deepcopy(self.model)
 
-        print "Initizlizing Optimizer"
+        print("Initizlizing Optimizer")
         self.optimizer = optimizers.RMSpropGraves(lr=0.00025, alpha=0.95, momentum=0.95, eps=0.01)
         self.optimizer.setup(self.model)
 
@@ -77,21 +76,26 @@ class DQN:
         tmp = self.model_target.q_function(s_dash)  # Q(s',*)
         tmp = list(map(np.max, tmp.data))  # max_a Q(s',a)
         max_q_prime = np.asanyarray(tmp, dtype=np.float32)
-        target = np.asanyarray(q.data, dtype=np.float32)
+        target = np.asanyarray(copy.deepcopy(q.data), dtype=np.float32)
 
-        for i in xrange(self.replay_size):
-            if not episode_end[i][0]:
+        for i in range(self.replay_size):
+            if episode_end[i][0] is True:
+                tmp_ = np.sign(reward[i])
+            else:
                 #  The sign of reward is used as the reward of DQN!
                 tmp_ = np.sign(reward[i]) + self.gamma * max_q_prime[i]
-            else:
-                tmp_ = np.sign(reward[i])
 
             target[i, action[i]] = tmp_
+            #print(tmp_)
 
+        #print(target)
         # TD-error clipping
         td = Variable(target) - q  # TD error
+        #print("TD ")
+        #print(td.data)
         td_tmp = td.data + 1000.0 * (abs(td.data) <= 1)  # Avoid zero division
         td_clip = td * (abs(td.data) <= 1) + td/abs(td_tmp) * (abs(td.data) > 1)
+        #print(np.round(td.data))
 
         zero_val = Variable(np.zeros((self.replay_size, self.n_act), dtype=np.float32))
         loss = F.mean_squared_error(td_clip, zero_val)
@@ -131,7 +135,7 @@ class DQN:
             r_replay = np.ndarray(shape=(rs, 1), dtype=np.float32)
             s_dash_replay = np.ndarray(shape=(rs, hs, ims, ims), dtype=np.float32)
             episode_end_replay = np.ndarray(shape=(rs, 1), dtype=np.bool)
-            for i in xrange(self.replay_size):
+            for i in range(self.replay_size):
                 s_replay[i] = np.asarray(self.replay_buffer[0][replay_index[i]], dtype=np.float32)
                 a_replay[i] = self.replay_buffer[1][replay_index[i]]
                 r_replay[i] = self.replay_buffer[2][replay_index[i]]
@@ -217,7 +221,7 @@ class DQN_Agent:  # RL-glue Process
         # Exploration decays along the time sequence
         if self.policyFrozen is False:  # Learning ON/OFF
             if self.dqn.initial_exploration < self.dqn.step:
-                self.epsilon -= 1.0/10**5#1.0/10**6
+                self.epsilon -= 1.0/10**6
                 if self.epsilon < 0.1:
                     self.epsilon = 0.1
                 eps = self.epsilon
@@ -271,7 +275,7 @@ class DQN_Agent:  # RL-glue Process
         self.last_observation = obs_array
 
         # Compose State : 4-step sequential observation
-        for i in xrange(self.dqn.n_history - 1):
+        for i in range(self.dqn.n_history - 1):
             self.state[i] = self.state[i + 1].astype(np.uint8)
         self.state[self.dqn.n_history - 1] = obs_processed.astype(np.uint8)
 

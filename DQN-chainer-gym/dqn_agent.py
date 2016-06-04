@@ -45,16 +45,16 @@ class DQN:
     img_size = 84  # 84x84 image input (fixed)
 
     def __init__(self, n_history, n_act):
-        print "Initializing DQN..."
+        print("Initializing DQN...")
         self.step = 0  # number of steps that DQN is updated
         self.n_act = n_act
         self.n_history = n_history  # Number of obervations used to construct the single state
 
-        print "Model Building"
+        print("Model Building")
         self.model = ActionValue(n_history, n_act).to_gpu()
         self.model_target = copy.deepcopy(self.model)
 
-        print "Initizlizing Optimizer"
+        print("Initizlizing Optimizer")
         self.optimizer = optimizers.RMSpropGraves(lr=0.00025, alpha=0.95, momentum=0.95, eps=0.01)
         self.optimizer.setup(self.model)
 
@@ -77,14 +77,14 @@ class DQN:
         tmp = self.model_target.q_function(s_dash)  # Q(s',*)
         tmp = list(map(np.max, tmp.data))  # max_a Q(s',a)
         max_q_prime = np.asanyarray(tmp, dtype=np.float32)
-        target = np.asanyarray(q.data.get(), dtype=np.float32)
+        target = np.asanyarray(copy.deepcopy(q.data.get()), dtype=np.float32)
 
-        for i in xrange(self.replay_size):
-            if not episode_end[i][0]:
+        for i in range(self.replay_size):
+            if episode_end[i][0] is True:
+                tmp_ = np.sign(reward[i])
+            else:
                 #  The sign of reward is used as the reward of DQN!
                 tmp_ = np.sign(reward[i]) + self.gamma * max_q_prime[i]
-            else:
-                tmp_ = np.sign(reward[i])
 
             target[i, action[i]] = tmp_
 
@@ -131,7 +131,7 @@ class DQN:
             r_replay = np.ndarray(shape=(rs, 1), dtype=np.float32)
             s_dash_replay = np.ndarray(shape=(rs, hs, ims, ims), dtype=np.float32)
             episode_end_replay = np.ndarray(shape=(rs, 1), dtype=np.bool)
-            for i in xrange(self.replay_size):
+            for i in range(self.replay_size):
                 s_replay[i] = np.asarray(self.replay_buffer[0][replay_index[i]], dtype=np.float32)
                 a_replay[i] = self.replay_buffer[1][replay_index[i]]
                 r_replay[i] = self.replay_buffer[2][replay_index[i]]
@@ -271,7 +271,7 @@ class DQN_Agent:  # RL-glue Process
         self.last_observation = obs_array
 
         # Compose State : 4-step sequential observation
-        for i in xrange(self.dqn.n_history - 1):
+        for i in range(self.dqn.n_history - 1):
             self.state[i] = self.state[i + 1].astype(np.uint8)
         self.state[self.dqn.n_history - 1] = obs_processed.astype(np.uint8)
 
