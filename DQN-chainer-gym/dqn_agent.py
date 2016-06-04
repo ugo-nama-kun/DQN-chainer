@@ -41,7 +41,7 @@ class DQN:
     initial_exploration = 10**4  # Initial exploratoin. original: 5x10^4
     replay_size = 32  # Replay (batch) size
     target_model_update_freq = 10**4  # Target update frequancy. original: 10^4
-    data_size = 10**6  # Data size of history. original: 10^6
+    data_size = 10**5  # Data size of history. original: 10^6
     img_size = 84  # 84x84 image input (fixed)
 
     def __init__(self, n_history, n_act):
@@ -217,7 +217,7 @@ class DQN_Agent:  # RL-glue Process
         # Exploration decays along the time sequence
         if self.policyFrozen is False:  # Learning ON/OFF
             if self.dqn.initial_exploration < self.dqn.step:
-                self.epsilon -= 1.0/10**5#1.0/10**6
+                self.epsilon -= 1.0/10**6
                 if self.epsilon < 0.1:
                     self.epsilon = 0.1
                 eps = self.epsilon

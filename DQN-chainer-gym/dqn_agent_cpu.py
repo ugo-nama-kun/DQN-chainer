@@ -15,15 +15,17 @@ from chainer import Chain
 import chainer.functions as F
 import chainer.links as L
 
+import matplotlib.pyplot as plt
+
 class ActionValue(Chain):
     def __init__(self, n_history, n_act):
         super(ActionValue, self).__init__(
-            l1=F.Convolution2D(n_history, 32, ksize=8, stride=4, nobias=False),#, wscale=np.sqrt(2)),
-            l2=F.Convolution2D(32, 64, ksize=4, stride=2, nobias=False),#, wscale=np.sqrt(2)),
-            l3=F.Convolution2D(64, 64, ksize=3, stride=1, nobias=False),#, wscale=np.sqrt(2)),
+            l1=F.Convolution2D(n_history, 32, ksize=8, stride=4, nobias=False, wscale=np.sqrt(2)),
+            l2=F.Convolution2D(32, 64, ksize=4, stride=2, nobias=False, wscale=np.sqrt(2)),
+            l3=F.Convolution2D(64, 64, ksize=3, stride=1, nobias=False, wscale=np.sqrt(2)),
             l4=F.Linear(3136, 512),#, wscale=np.sqrt(2)),
             q_value=F.Linear(512, n_act,
-                             initialW=0.0001*np.random.randn(n_act, 512).astype(np.float32))
+                             initialW=0.0*np.random.randn(n_act, 512).astype(np.float32))
         )
 
     def q_function(self, state):
@@ -270,6 +272,13 @@ class DQN_Agent:  # RL-glue Process
         # Preproces
         obs_array = self.scale_image(observation)
         obs_processed = np.maximum(obs_array, self.last_observation)  # Take maximum from two frames
+
+        """
+        print(obs_processed.max())
+        plt.imshow(obs_processed)
+        plt.draw()
+        plt.pause(0.0001)
+        """
 
         # Updates for the next step
         self.last_observation = obs_array

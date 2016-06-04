@@ -5,8 +5,8 @@ Simple gym experiment setup
 
 
 import gym
-#import dqn_agent as ag # for GPU experiment
-import dqn_agent_cpu as ag # for CPU experiment
+import dqn_agent as ag # for GPU experiment
+#import dqn_agent_cpu as ag # for CPU experiment
 import matplotlib.pyplot as plt
 import numpy as np
 import time
@@ -59,6 +59,7 @@ for i_episode in range(num_episode):
         plt.clf()
         plt.plot(eval_steps, total_score)
         plt.legend(["Total Score"])
+        plt.savefig("result_plot.png")
         plt.draw()
         plt.pause(0.001)
 
