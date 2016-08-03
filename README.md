@@ -20,6 +20,7 @@ My implementation is dependent on RL-glue, Arcade Learning Environment, and Chai
 * Python 2.7+
 * Numpy
 * Scipy
+* Pillow (PIL)
 * Chainer (1.3.0): https://github.com/pfnet/chainer
 * RL-glue core: https://sites.google.com/a/rl-community.org/rl-glue/Home/rl-glue
 * RL-glue Python codec: https://sites.google.com/a/rl-community.org/rl-glue/Home/Extensions/python-codec
